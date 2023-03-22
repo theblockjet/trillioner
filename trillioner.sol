@@ -360,7 +360,7 @@ contract Trillioner is Context, IERC20, Ownable {
 
   constructor() public {
     _name = "Trillioner";
-    _symbol = "Trillioner";
+    _symbol = "TLC";
     _decimals = 18;
     _totalSupply = 1000000000 * 10 ** uint256(_decimals);
     _balances[msg.sender] = _totalSupply;
