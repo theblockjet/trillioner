@@ -373,7 +373,7 @@ contract Trillioner is Context, IERC20, Ownable {
         uint256 startTime;
         uint256 initialLock;
         uint256 lockedToken;
-        uint256 remainingToken;
+        uint256 remainingLockedToken;
         uint256 monthCount;
         uint256 openingPercentage;
     }
@@ -546,7 +546,7 @@ contract Trillioner is Context, IERC20, Ownable {
     require(sender != recipient, "Invalid target");
 
     if (locks[sender].lockedToken > 0) {
-            uint256 withdrawable = balanceOf(sender) - locks[sender].remainingToken;
+            uint256 withdrawable = balanceOf(sender) - locks[sender].remainingLockedToken;
             require(amount <= withdrawable,"Not enough Unlocked token Available");
     }
     
@@ -565,22 +565,22 @@ contract Trillioner is Context, IERC20, Ownable {
         require(target_ != address(0), "Target address can not be zero address");
         uint256 startTime = locks[target_].startTime;
         uint256 lockedToken = locks[target_].lockedToken;
-        uint256 remainingToken = locks[target_].remainingToken;
+        uint256 remainingLockedToken = locks[target_].remainingLockedToken;
         uint256 monthCount = locks[target_].monthCount;
         uint256 initialLock = locks[target_].initialLock;
         uint256 openingPercentage = locks[target_].openingPercentage;
         
-        require(remainingToken != 0, "All tokens are unlocked");
+        require(remainingLockedToken != 0, "All tokens are unlocked");
 
         require(
-            block.timestamp > startTime + (initialLock * 1 days),
+            block.timestamp > startTime + (initialLock * 1 seconds),
             "UnLocking period is not opened"
         );
         uint256 timePassed = block.timestamp -
-            (startTime + (initialLock * 1 days));
+            (startTime + (initialLock * 1 seconds));
 
-        uint256 monthNumber = (uint256(timePassed) + (uint256(30 days) - 1)) /
-            uint256(30 days);
+        uint256 monthNumber = (uint256(timePassed) + (uint256(30 seconds) - 1)) /
+            uint256(30 seconds);
         uint256 installment = uint256(100) / openingPercentage;
         
         if(monthNumber>installment) monthNumber=installment;
@@ -592,11 +592,11 @@ contract Trillioner is Context, IERC20, Ownable {
 
         uint256 receivableToken = (lockedToken * (remainingMonth * openingPercentage)) / 100;
 
-        locks[target_].monthCount += remainingMonth;   
-        remainingToken -= receivableToken;
-        locks[target_].remainingToken = remainingToken;
+        locks[target_].monthCount += remainingMonth; 
+        remainingLockedToken -= receivableToken;
+        locks[target_].remainingLockedToken = remainingLockedToken;
 
-        if (locks[target_].remainingToken == 0) {
+        if (locks[target_].remainingLockedToken == 0) {
             delete locks[target_];
         }
     }
@@ -682,6 +682,4 @@ contract Trillioner is Context, IERC20, Ownable {
     _allowances[owner][spender] = amount;
     emit Approval(owner, spender, amount);
   }
-
-
 }
